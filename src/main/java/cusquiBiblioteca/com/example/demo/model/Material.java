@@ -25,6 +25,7 @@ public abstract class Material {
     private String nombre;
     private String autor;
     private boolean disponible;
+    private String categoria; 
 
     public abstract int diasPrestamo();
 }
