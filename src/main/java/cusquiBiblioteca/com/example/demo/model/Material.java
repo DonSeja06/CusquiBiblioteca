@@ -1,5 +1,6 @@
 package cusquiBiblioteca.com.example.demo.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +25,11 @@ public abstract class Material {
 
     private String nombre;
     private String autor;
-    private boolean disponible;
-    private String categoria; 
+    private boolean disponible = true;
+    private String categoria;
+    private String urlImagen;
+    @Column(columnDefinition = "TEXT")
+    private String descripcion; 
 
     public abstract int diasPrestamo();
 }

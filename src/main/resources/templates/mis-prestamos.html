@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Préstamos - Cusquibiblioteca</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'biblioteca-bg': '#FAF8F5',
+                        'biblioteca-bg-dark': '#2A2421',
+                        'biblioteca-brown': '#B89B84',
+                        'biblioteca-brown-hover': '#9E816B',
+                        'biblioteca-text': '#4A3C31',
+                        'biblioteca-text-light': '#8C7B6E',
+                        'pastel-blue': '#E4EDF2',
+                    },
+                    fontFamily: {
+                        'serif': ['"Playfair Display"', 'serif'],
+                        'sans': ['"Outfit"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAF8F5; color: #4A3C31; transition: all 0.3s ease; }
+        .dark body { background-color: #2A2421; color: #E8E3DF; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #B89B84; border-radius: 10px; }
+        .glass-nav { background: rgba(250, 248, 245, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(184, 155, 132, 0.2); }
+        .dark .glass-nav { background: rgba(42, 36, 33, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .book-cover { aspect-ratio: 2 / 3; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navegación Dinámica -->
+    <header class="glass-nav sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                
+                <a th:href="@{/}" class="flex items-center gap-3 cursor-pointer">
+                    <div class="w-10 h-10 rounded-full bg-biblioteca-brown text-white flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-book-open text-lg"></i>
+                    </div>
+                    <span class="font-serif font-bold text-2xl tracking-wide text-biblioteca-text dark:text-white">Cusquibiblioteca</span>
+                </a>
+
+                <nav class="hidden md:flex items-center space-x-2">
+                    <a th:href="@{/}" class="px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-300 dark:hover:bg-white/5 transition-all">Inicio</a>
+                    <a th:href="@{/catalogo}" class="px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-300 dark:hover:bg-white/5 transition-all">Catálogo</a>
+                    <a th:href="@{/mis-prestamos}" class="bg-biblioteca-brown/10 px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text dark:bg-white/10 dark:text-white transition-all">Mis Préstamos</a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full flex items-center justify-center text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-400 dark:hover:bg-white/10 transition-colors">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:block"></i>
+                    </button>
+
+                    <!-- Perfil desplegable (Siempre visible en esta pantalla protegida) -->
+                    <div class="flex items-center gap-3 relative group">
+                        <span class="text-sm font-medium text-biblioteca-text dark:text-white hidden sm:block" th:text="'Hola, ' + ${#strings.arraySplit(session.usuarioLogeado.nombre, ' ')[0]}">Hola, Usuario</span>
+                        
+                        <div class="w-9 h-9 rounded-full bg-pastel-blue border-2 border-white dark:border-gray-700 shadow-sm overflow-hidden cursor-pointer relative">
+                            <img th:src="'https://api.dicebear.com/7.x/notionists/svg?seed=' + ${session.usuarioLogeado.nombre} + '&backgroundColor=E4EDF2'" alt="Perfil" class="w-full h-full object-cover">
+                        </div>
+
+                        <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#352D29] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="p-2 border-b border-gray-100 dark:border-white/10 sm:hidden">
+                                <p class="text-sm font-bold text-biblioteca-text dark:text-white px-3 py-1 truncate" th:text="${session.usuarioLogeado.nombre}">Nombre</p>
+                            </div>
+                            <div class="p-2">
+                                <a th:href="@{/perfil}" class="block px-3 py-2.5 text-sm text-biblioteca-text-light hover:text-biblioteca-brown hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5 rounded-lg transition-colors">
+                                    <i class="fa-regular fa-user mr-2 w-4"></i> Mi Perfil
+                                </a>
+                                <a th:href="@{/mis-prestamos}" class="block px-3 py-2.5 text-sm text-biblioteca-text-light hover:text-biblioteca-brown hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5 rounded-lg transition-colors">
+                                    <i class="fa-solid fa-book-open mr-2 w-4"></i> Mis Préstamos
+                                </a>
+                                <div class="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
+                                <a th:href="@{/logout}" class="block px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium">
+                                    <i class="fa-solid fa-arrow-right-from-bracket mr-2 w-4"></i> Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <div class="mb-10">
+            <h1 class="text-3xl md:text-4xl font-serif font-bold text-biblioteca-text dark:text-white mb-2">Mis Préstamos</h1>
+            <p class="text-biblioteca-text-light dark:text-gray-400">Gestiona los libros y revistas que estás leyendo actualmente.</p>
+        </div>
+
+        <!-- Alerta de éxito al devolver -->
+        <div th:if="${param.exito}" class="bg-green-50 text-green-600 border border-green-200 text-sm rounded-xl p-4 mb-6 flex items-center gap-3 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+            <i class="fa-solid fa-check-circle"></i>
+            <span>¡Material devuelto con éxito! Gracias por cuidarlo.</span>
+        </div>
+
+        <!-- Alerta amarilla cuando hay devolución con retraso (NUEVO) -->
+        <div th:if="${param.retraso}" class="bg-yellow-50 text-yellow-700 border border-yellow-200 text-sm rounded-xl p-4 mb-6 flex items-center gap-3 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-500">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>El material fue devuelto con retraso. Se ha aplicado una multa a tu perfil.</span>
+        </div>
+
+        <div class="bg-white dark:bg-[#352D29] rounded-2xl shadow-soft border border-biblioteca-brown/20 dark:border-white/5 overflow-hidden">
+            <div class="divide-y divide-biblioteca-brown/10 dark:divide-white/5">
+                
+                <!-- Bucle de Préstamos -->
+                <div th:each="prestamo : ${prestamos}" class="flex flex-col sm:flex-row p-6 gap-6 items-center sm:items-start hover:bg-biblioteca-bg dark:hover:bg-[#201B19] transition-colors">
+                    
+                    <img th:src="${prestamo.material.urlImagen != null && !prestamo.material.urlImagen.isEmpty() ? prestamo.material.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-24 book-cover object-cover rounded-md shadow-sm">
+                    
+                    <div class="flex-1 text-center sm:text-left flex flex-col justify-center h-full w-full">
+                        <span class="bg-pastel-blue text-[#4A728A] text-[10px] font-bold uppercase px-2 py-1 rounded-sm self-center sm:self-start mb-2" th:text="${prestamo.material.categoria != null ? prestamo.material.categoria : 'Material'}">Género</span>
+                        
+                        <h3 class="font-serif font-bold text-xl text-biblioteca-text dark:text-white mb-1" th:text="${prestamo.material.nombre}">Título</h3>
+                        <p class="text-biblioteca-brown text-sm mb-4" th:text="${prestamo.material.autor}">Autor</p>
+                        
+                        <div class="flex flex-col sm:flex-row items-center gap-4 mt-auto border-t border-biblioteca-brown/10 dark:border-white/5 pt-4 w-full">
+                            
+                            <!-- Fecha límite esperada -->
+                            <div class="text-sm font-medium text-biblioteca-text-light flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-biblioteca-brown"></i>
+                                Límite: <span class="font-bold text-biblioteca-text dark:text-white" th:text="${prestamo.fechaDevolucionEsperada != null ? #temporals.format(prestamo.fechaDevolucionEsperada, 'dd-MM-yyyy') : 'Pendiente'}">25-07-2026</span>
+                            </div>
+
+                            <!-- Si el estado es ACTIVO, mostramos el botón -->
+                            <form th:if="${prestamo.estado == 'ACTIVO'}" th:action="@{/devolver-prestamo}" method="post" class="ml-auto w-full sm:w-auto mt-4 sm:mt-0">
+                                <input type="hidden" name="prestamoId" th:value="${prestamo.id}">
+                                <button type="submit" class="w-full bg-transparent border border-biblioteca-brown text-biblioteca-brown px-4 py-1.5 rounded-full text-sm font-medium hover:bg-biblioteca-brown hover:text-white transition-colors dark:text-gray-300 dark:border-gray-500 dark:hover:bg-biblioteca-brown dark:hover:border-biblioteca-brown">
+                                    Devolver Ahora
+                                </button>
+                            </form>
+
+                            <!-- Si el estado es DEVUELTO, mostramos cuándo lo devolvió -->
+                            <div th:if="${prestamo.estado == 'DEVUELTO'}" class="ml-auto w-full sm:w-auto mt-4 sm:mt-0 text-sm text-green-600 dark:text-green-400 font-bold flex items-center gap-2 justify-end">
+                                <i class="fa-solid fa-check"></i>
+                                Entregado el <span th:text="${prestamo.fechaDevolucionReal != null ? #temporals.format(prestamo.fechaDevolucionReal, 'dd-MM-yyyy') : 'Hoy'}">20-07-2026</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensaje cuando no tiene nada prestado -->
+                <div th:if="${#lists.isEmpty(prestamos)}" class="p-16 text-center flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-book-open-reader text-5xl text-biblioteca-brown/30 mb-4"></i>
+                    <p class="text-biblioteca-text-light font-serif text-xl italic mb-4">Aún no tienes préstamos registrados.</p>
+                    <a th:href="@{/catalogo}" class="bg-biblioteca-brown text-white px-6 py-2 rounded-full font-medium hover:bg-biblioteca-brown-hover transition-colors shadow-sm">
+                        Explorar el Catálogo
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>
