@@ -19,10 +19,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        List<Libro> todosLosLibros = libroRepository.findAll();
-
-        int limit = Math.min(todosLosLibros.size(), 5);
-        List<Libro> librosDestacados = todosLosLibros.subList(0, limit);
+        List<Libro> librosDestacados = libroRepository.findTop5ByOrderByIdDesc();
 
         model.addAttribute("librosDestacados", librosDestacados);
         return "index";

@@ -1,6 +1,7 @@
 package cusquiBiblioteca.com.example.demo.repository;
 
 import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,4 +13,5 @@ public interface LibroRepository extends JpaRepository<Libro,Long>{
     Optional<Libro> findByNombre(String nombre);
     Optional<Libro> findByEditorial(String editorial);
     Optional<Libro> findByAutor(String autor);
+    List<Libro> findTop5ByOrderByIdDesc();
 }

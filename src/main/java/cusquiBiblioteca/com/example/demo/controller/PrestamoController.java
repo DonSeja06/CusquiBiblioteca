@@ -1,5 +1,7 @@
 package cusquiBiblioteca.com.example.demo.controller;
 
+import cusquiBiblioteca.com.example.demo.exception.BusinessRuleException;
+import cusquiBiblioteca.com.example.demo.exception.ResourceNotFoundException;
 import cusquiBiblioteca.com.example.demo.model.Material;
 import cusquiBiblioteca.com.example.demo.model.Prestamo;
 import cusquiBiblioteca.com.example.demo.model.Usuario;
@@ -54,32 +56,31 @@ public class PrestamoController {
         }
 
         if (usuarioLogeado.getMultaAcumulada() > 0) {
-            return "redirect:/catalogo?error=multa";
+            throw new BusinessRuleException("No puedes solicitar préstamos si tienes multas pendientes.");
         }
 
-        Optional<Material> materialOpt = materialRepository.findById(materialId);
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new ResourceNotFoundException("El material solicitado no existe."));
 
-        if (materialOpt.isPresent() && materialOpt.get().isDisponible()) {
-            Material material = materialOpt.get();
-
-            Prestamo nuevoPrestamo = new Prestamo();
-            nuevoPrestamo.setUsuario(usuarioLogeado);
-            nuevoPrestamo.setMaterial(material);
-
-            nuevoPrestamo.setFechaPrestamo(LocalDateTime.now());
-            nuevoPrestamo.setFechaDevolucionEsperada(LocalDateTime.now().plusDays(material.diasPrestamo()));
-            nuevoPrestamo.setEstado("ACTIVO");
-
-            material.setDisponible(false);
-
-            materialRepository.save(material);
-            prestamoRepository.save(nuevoPrestamo);
-
-            return "redirect:/mis-prestamos";
+        if (!material.isDisponible()) {
+            throw new BusinessRuleException("El material no se encuentra disponible actualmente.");
         }
 
-        return "redirect:/catalogo?error=no-disponible";
+        Prestamo nuevoPrestamo = new Prestamo();
+        nuevoPrestamo.setUsuario(usuarioLogeado);
+        nuevoPrestamo.setMaterial(material);
+        nuevoPrestamo.setFechaPrestamo(LocalDateTime.now());
+        nuevoPrestamo.setFechaDevolucionEsperada(LocalDateTime.now().plusDays(material.diasPrestamo()));
+        nuevoPrestamo.setEstado("ACTIVO");
+
+        material.setDisponible(false);
+
+        materialRepository.save(material);
+        prestamoRepository.save(nuevoPrestamo);
+
+        return "redirect:/mis-prestamos";
     }
+
 
     @PostMapping("/devolver-prestamo")
     public String devolverPrestamo(@RequestParam("prestamoId") Long prestamoId, HttpSession session) {
@@ -89,47 +90,46 @@ public class PrestamoController {
             return "redirect:/login";
         }
 
-        Optional<Prestamo> prestamoOpt = prestamoRepository.findById(prestamoId);
+        Prestamo prestamo = prestamoRepository.findById(prestamoId)
+                .orElseThrow(() -> new ResourceNotFoundException("El registro de préstamo no existe."));
 
-        if (prestamoOpt.isPresent()) {
-            Prestamo prestamo = prestamoOpt.get();
-
-            if (prestamo.getUsuario().getId().equals(usuarioLogeado.getId()) && "ACTIVO".equals(prestamo.getEstado())) {
-
-                LocalDateTime ahora = LocalDateTime.now();
-                prestamo.setFechaDevolucionReal(ahora);
-                prestamo.setEstado("DEVUELTO");
-
-                long diasRetraso = ChronoUnit.DAYS.between(
-                        prestamo.getFechaDevolucionEsperada().toLocalDate(),
-                        ahora.toLocalDate());
-
-                if (diasRetraso > 0) {
-                    float costoPorDia = 2.0f;
-                    float multaGenerada = diasRetraso * costoPorDia;
-
-                    Usuario usuario = prestamo.getUsuario();
-                    usuario.setMultaAcumulada(usuario.getMultaAcumulada() + multaGenerada);
-
-                    usuarioRepository.save(usuario);
-
-                    session.setAttribute("usuarioLogeado", usuario);
-                }
-
-                Material material = prestamo.getMaterial();
-                material.setDisponible(true);
-
-                materialRepository.save(material);
-                prestamoRepository.save(prestamo);
-
-                if (diasRetraso > 0) {
-                    return "redirect:/mis-prestamos?exito=devuelto&retraso=true";
-                }
-
-                return "redirect:/mis-prestamos?exito=devuelto";
-            }
+        if (!prestamo.getUsuario().getId().equals(usuarioLogeado.getId())) {
+            throw new BusinessRuleException("No tienes permisos para devolver este préstamo.");
+        }
+        
+        if (!"ACTIVO".equals(prestamo.getEstado())) {
+            throw new BusinessRuleException("Este préstamo ya ha sido devuelto o se encuentra inactivo.");
         }
 
-        return "redirect:/mis-prestamos?error=true";
+        LocalDateTime ahora = LocalDateTime.now();
+        prestamo.setFechaDevolucionReal(ahora);
+        prestamo.setEstado("DEVUELTO");
+
+        long diasRetraso = ChronoUnit.DAYS.between(
+                prestamo.getFechaDevolucionEsperada().toLocalDate(),
+                ahora.toLocalDate());
+
+        if (diasRetraso > 0) {
+            float costoPorDia = 2.0f;
+            float multaGenerada = diasRetraso * costoPorDia;
+
+            Usuario usuario = prestamo.getUsuario();
+            usuario.setMultaAcumulada(usuario.getMultaAcumulada() + multaGenerada);
+
+            usuarioRepository.save(usuario);
+            session.setAttribute("usuarioLogeado", usuario);
+        }
+
+        Material material = prestamo.getMaterial();
+        material.setDisponible(true);
+
+        materialRepository.save(material);
+        prestamoRepository.save(prestamo);
+
+        if (diasRetraso > 0) {
+            return "redirect:/mis-prestamos?exito=devuelto&retraso=true";
+        }
+
+        return "redirect:/mis-prestamos?exito=devuelto";
     }
 }

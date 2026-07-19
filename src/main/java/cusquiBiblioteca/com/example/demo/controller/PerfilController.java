@@ -1,5 +1,6 @@
 package cusquiBiblioteca.com.example.demo.controller;
 
+import cusquiBiblioteca.com.example.demo.exception.ResourceNotFoundException;
 import cusquiBiblioteca.com.example.demo.model.Usuario;
 import cusquiBiblioteca.com.example.demo.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpSession;
@@ -37,15 +38,14 @@ public class PerfilController {
             return "redirect:/login";
         }
 
-        Usuario usuario = usuarioRepository.findById(usuarioLogeado.getId()).orElse(null);
+        Usuario usuario = usuarioRepository.findById(usuarioLogeado.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario no existe en el sistema."));
 
-        if (usuario != null) {
-            usuario.setMultaAcumulada(0.0f);
+        usuario.setMultaAcumulada(0.0f);
+        usuarioRepository.save(usuario);
 
-            usuarioRepository.save(usuario);
-
-            session.setAttribute("usuarioLogeado", usuario);
-        }
+        session.setAttribute("usuarioLogeado", usuario);
+        
 
         return "redirect:/perfil?exitoPago=true";
     }

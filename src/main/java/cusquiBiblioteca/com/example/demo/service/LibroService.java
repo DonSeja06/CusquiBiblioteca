@@ -19,9 +19,9 @@ public class LibroService {
    
     public void buscarYMostrarLibrosPorAutor(String autor) {
         System.out.println("Resultados para el autor: " + autor);
-        
+
         libroRepository.findAll().stream()
-                .filter(libro -> libro.getAutor().equalsIgnoreCase(autor))
+                .filter(libro -> libro.getAutor() != null && libro.getAutor().equalsIgnoreCase(autor)) // <-- Protección añadida
                 .forEach(libro -> System.out.println("- " + libro.getNombre() + " (Categoría: " + libro.getCategoria() + ")"));
     }
 

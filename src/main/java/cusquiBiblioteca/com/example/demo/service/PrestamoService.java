@@ -30,7 +30,9 @@ public class PrestamoService {
     public List<String> obtenerCorreosParaNotificacionVencimiento() {
         return prestamoRepository.findAll().stream()
                 .filter(prestamo -> prestamo.getEstado().equalsIgnoreCase("VENCIDO"))
+                .filter(prestamo -> prestamo.getUsuario() != null) // <-- Evita NullPointerException si no hay usuario
                 .map(prestamo -> prestamo.getUsuario().getCorreo())
+                .filter(correo -> correo != null) // <-- Evita correos nulos
                 .distinct() 
                 .collect(Collectors.toList());
     }
