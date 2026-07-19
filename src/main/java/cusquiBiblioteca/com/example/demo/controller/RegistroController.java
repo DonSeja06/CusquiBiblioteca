@@ -17,22 +17,16 @@ public class RegistroController {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // Muestra el formulario de registro
     @GetMapping("/registro")
     public String mostrarRegistro(Model model) {
-        // Enviamos un objeto Usuario vacío para que Thymeleaf lo llene
         model.addAttribute("usuario", new Usuario());
         return "registro";
     }
 
-    // Guarda el nuevo usuario en la base de datos
     @PostMapping("/registro")
     public String registrarUsuario(@ModelAttribute Usuario usuario) {
-        // Aquí se guarda directamente en MySQL
-        // (Nota: En el futuro, aquí deberías encriptar la contraseña)
         usuarioRepository.save(usuario);
-        
-        // Redirigimos al login con un parámetro de éxito
+
         return "redirect:/login?exitoRegistro=true";
     }
 }

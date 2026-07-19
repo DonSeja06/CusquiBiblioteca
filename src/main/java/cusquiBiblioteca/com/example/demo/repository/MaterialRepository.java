@@ -10,19 +10,16 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Long> {
-    
-    // Busca en título, autor o categoría
+
     @Query("SELECT m FROM Material m WHERE " +
-           "LOWER(m.nombre) LIKE LOWER(CONCAT('%', :termino, '%')) OR " +
-           "LOWER(m.autor) LIKE LOWER(CONCAT('%', :termino, '%')) OR " +
-           "LOWER(m.categoria) LIKE LOWER(CONCAT('%', :termino, '%'))")
+            "LOWER(m.nombre) LIKE LOWER(CONCAT('%', :termino, '%')) OR " +
+            "LOWER(m.autor) LIKE LOWER(CONCAT('%', :termino, '%')) OR " +
+            "LOWER(m.categoria) LIKE LOWER(CONCAT('%', :termino, '%'))")
     Page<Material> buscarPorTermino(@Param("termino") String termino, Pageable pageable);
-    
-    // NUEVO: Busca exactamente por la Clase (Libro)
+
     @Query("SELECT m FROM Material m WHERE TYPE(m) = Libro")
     Page<Material> findAllLibros(Pageable pageable);
 
-    // NUEVO: Busca exactamente por la Clase (Revista)
     @Query("SELECT m FROM Material m WHERE TYPE(m) = Revista")
     Page<Material> findAllRevistas(Pageable pageable);
 }

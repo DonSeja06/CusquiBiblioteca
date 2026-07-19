@@ -24,12 +24,10 @@ public class AdminController {
         this.revistaRepository = revistaRepository;
     }
 
-    // --- VISTAS GET (Muestran los formularios) ---
-
     @GetMapping("/agregar-libro")
     public String mostrarFormularioLibro(Model model) {
         model.addAttribute("libro", new Libro());
-        return "formulario-libro"; 
+        return "formulario-libro";
     }
 
     @GetMapping("/agregar-revista")
@@ -38,23 +36,17 @@ public class AdminController {
         return "formulario-revista";
     }
 
-    // --- MÉTODOS POST (Guardan en la base de datos) ---
-
     @PostMapping("/guardar-libro")
     public String guardarLibro(@ModelAttribute Libro libro) {
-        // Aquí es donde la magia ocurre: se guarda en la BD (MySQL)
         libroRepository.save(libro);
-        
-        // Redirigimos al formulario limpio de nuevo (puedes agregar un parámetro ?exito para mostrar un mensaje)
+
         return "redirect:/admin/agregar-libro?exito";
     }
 
     @PostMapping("/guardar-revista")
     public String guardarRevista(@ModelAttribute Revista revista) {
-        // Se guarda en la BD
         revistaRepository.save(revista);
-        
-        // Redirigimos de vuelta
+
         return "redirect:/admin/agregar-revista?exito";
     }
 }

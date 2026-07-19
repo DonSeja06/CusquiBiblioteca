@@ -23,25 +23,21 @@ public class CatalogoController {
     public String mostrarCatalogo(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "categoria", required = false) String categoria, 
+            @RequestParam(value = "categoria", required = false) String categoria,
             Model model) {
-        
+
         int pageSize = 10;
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Material> paginaMateriales;
 
-        // LÓGICA DE FILTROS Y BÚSQUEDA CORREGIDA
+        // LÓGICA DE FILTROS Y BÚSQUEDA
         if (search != null && !search.trim().isEmpty()) {
-            // 1. Si usa el buscador
             paginaMateriales = materialRepository.buscarPorTermino(search.trim(), pageable);
         } else if ("libro".equalsIgnoreCase(categoria)) {
-            // 2. Si presiona el botón "Libros", busca la CLASE Libro
             paginaMateriales = materialRepository.findAllLibros(pageable);
         } else if ("revista".equalsIgnoreCase(categoria)) {
-            // 3. Si presiona el botón "Revistas", busca la CLASE Revista
             paginaMateriales = materialRepository.findAllRevistas(pageable);
         } else {
-            // 4. "Todos"
             paginaMateriales = materialRepository.findAll(pageable);
         }
 
@@ -50,9 +46,9 @@ public class CatalogoController {
         model.addAttribute("totalPaginas", paginaMateriales.getTotalPages());
         model.addAttribute("tieneAnterior", paginaMateriales.hasPrevious());
         model.addAttribute("tieneSiguiente", paginaMateriales.hasNext());
-        
+
         model.addAttribute("search", search);
-        model.addAttribute("categoriaSeleccionada", categoria); 
+        model.addAttribute("categoriaSeleccionada", categoria);
 
         return "catalogo";
     }

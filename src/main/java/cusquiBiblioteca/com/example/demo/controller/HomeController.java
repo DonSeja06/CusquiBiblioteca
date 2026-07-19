@@ -20,12 +20,11 @@ public class HomeController {
     @GetMapping("/")
     public String index(Model model) {
         List<Libro> todosLosLibros = libroRepository.findAll();
-        
-        // Simulamos "los más pedidos" obteniendo un máximo de 5 libros
+
         int limit = Math.min(todosLosLibros.size(), 5);
         List<Libro> librosDestacados = todosLosLibros.subList(0, limit);
 
         model.addAttribute("librosDestacados", librosDestacados);
-        return "index"; // Retorna la vista index.html
+        return "index";
     }
 }

@@ -93,19 +93,16 @@
                     <!-- ESTADO 2: LOGEADO (Perfil desplegable) -->
                     <div th:if="${session.usuarioLogeado != null}" class="flex items-center gap-3 relative group">
                         
-                        <!-- Saludo extrayendo solo el primer nombre -->
                         <span class="text-sm font-medium text-biblioteca-text dark:text-white hidden sm:block" th:text="'Hola, ' + ${#strings.arraySplit(session.usuarioLogeado.nombre, ' ')[0]}">Hola, Usuario</span>
                         
                         <!-- Avatar -->
                         <div class="w-9 h-9 rounded-full bg-pastel-blue border-2 border-white dark:border-gray-700 shadow-sm overflow-hidden cursor-pointer relative">
-                            <!-- Usamos la inicial del nombre para generar un avatar dinámico de dicebear -->
                             <img th:src="'https://api.dicebear.com/7.x/notionists/svg?seed=' + ${session.usuarioLogeado.nombre} + '&backgroundColor=E4EDF2'" alt="Perfil" class="w-full h-full object-cover">
                         </div>
 
                         <!-- Menú Desplegable (Oculto por defecto, se muestra al hacer hover) -->
                         <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#352D29] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             
-                            <!-- Información visible solo en móvil dentro del menú -->
                             <div class="p-2 border-b border-gray-100 dark:border-white/10 sm:hidden">
                                 <p class="text-sm font-bold text-biblioteca-text dark:text-white px-3 py-1 truncate" th:text="${session.usuarioLogeado.nombre}">Nombre Completo</p>
                             </div>
@@ -118,7 +115,6 @@
                                     <i class="fa-solid fa-book-open mr-2 w-4"></i> Mis Préstamos
                                 </a>
                                 <div class="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
-                                <!-- Esto llama al método /logout que hicimos en tu LoginController -->
                                 <a th:href="@{/logout}" class="block px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium">
                                     <i class="fa-solid fa-arrow-right-from-bracket mr-2 w-4"></i> Cerrar Sesión
                                 </a>
@@ -157,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- Destacados desde MySQL -->
             <div>
                 <div class="flex justify-between items-end mb-6">
                     <div>
@@ -169,17 +164,13 @@
                     <a th:href="@{/catalogo}" class="text-biblioteca-brown font-medium hover:underline text-sm hidden sm:block">Ver catálogo completo</a>
                 </div>
                 
-                <!-- Grid Dinámico Thymeleaf -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     
-                    <!-- Bucle iterando sobre los libros traídos del controlador -->
                     <div th:each="libro : ${librosDestacados}" class="group cursor-pointer flex flex-col h-full bg-white dark:bg-[#352D29] rounded-2xl p-3 border border-biblioteca-brown/10 hover:border-biblioteca-brown/40 transition-all shadow-sm hover:shadow-soft" th:onclick="'openModal(' + ${libro.id} + ')'">
                         
                         <div class="relative rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
-                            <!-- Validamos si hay URL de imagen, si no, ponemos un placeholder -->
                             <img th:src="${libro.urlImagen != null && !libro.urlImagen.isEmpty() ? libro.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-full book-cover object-cover group-hover:scale-105 transition-transform duration-500">
                             
-                            <!-- Indicador de disponibilidad -->
                             <div th:if="${libro.disponible}" class="absolute top-3 right-3 w-3 h-3 bg-green-400 rounded-full border-2 border-white shadow-sm" title="Disponible"></div>
                             <div th:unless="${libro.disponible}" class="absolute top-3 right-3 w-3 h-3 bg-red-400 rounded-full border-2 border-white shadow-sm" title="Prestado"></div>
                             
@@ -196,7 +187,6 @@
 
                     </div>
                     
-                    <!-- Mensaje si no hay libros en la BD -->
                     <div th:if="${#lists.isEmpty(librosDestacados)}" class="col-span-full text-center py-10">
                         <p class="text-biblioteca-text-light font-serif italic">Aún no hay libros registrados en la biblioteca.</p>
                     </div>
@@ -207,32 +197,23 @@
 
     </main>
 
-    <!-- Modal Simplificado para Vista No Logeado -->
-    <!-- Modal Centrado y Estilizado (Idéntico a la imagen) -->
     <div id="book-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6 opacity-0 transition-opacity duration-300">
-        <!-- Fondo oscuro con desenfoque -->
         <div class="absolute inset-0 bg-biblioteca-text/40 dark:bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
         
-        <!-- Contenedor interno que asegura el centrado perfecto -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
             
-            <!-- Tarjeta principal del Modal -->
             <div class="bg-white dark:bg-[#2A2421] w-full max-w-3xl rounded-[2rem] shadow-2xl relative z-10 overflow-hidden flex flex-col md:flex-row transform scale-95 transition-transform duration-300 pointer-events-auto" id="modal-content">
                 
-                <!-- Botón de Cerrar (Equis circular) -->
                 <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-red-500 transition-colors z-20">
                     <i class="fa-solid fa-times text-sm"></i>
                 </button>
 
-                <!-- Lado Izquierdo: Fondo crema e Imagen -->
                 <div class="w-full md:w-5/12 bg-biblioteca-bg dark:bg-[#201B19] p-8 md:p-12 flex items-center justify-center border-r border-transparent">
                     <img id="modal-cover" src="" class="w-full max-w-[190px] object-cover rounded shadow-lg book-cover relative z-10">
                 </div>
 
-                <!-- Lado Derecho: Textos y Detalles -->
                 <div class="w-full md:w-7/12 p-8 md:p-10 flex flex-col justify-center">
                     
-                    <!-- Etiqueta de Categoría (Estilo pastilla) -->
                     <span id="modal-genre" class="px-3 py-1 bg-pastel-blue text-[#4A728A] text-[10px] font-bold uppercase tracking-wider rounded-full self-start mb-4">
                         LITERATURA INFANTIL Y JUVENIL
                     </span>
@@ -242,7 +223,6 @@
                     <p id="modal-desc" class="text-biblioteca-text-light dark:text-gray-300 text-sm leading-relaxed mb-6 line-clamp-4">
                         Aquí irá la sinopsis...
                     </p>
-                    <!-- Línea divisoria y estadísticas en columnas -->
                     <div class="border-y border-gray-100 dark:border-white/5 py-4 mb-8 flex gap-8">
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-bold">Páginas</p>
@@ -258,7 +238,6 @@
                         </div>
                     </div>
 
-                    <!-- Botón de Inicio de Sesión -->
                     <div class="mt-auto">
                         <a th:href="@{/login}" class="w-full py-3 rounded-xl font-bold text-white bg-[#BE9E83] hover:bg-[#A68971] transition-all flex justify-center items-center gap-2">
                             <i class="fa-solid fa-lock text-sm"></i> Inicia sesión para solicitar préstamo
@@ -269,7 +248,6 @@
         </div>
     </div>
 
-    <!-- Convertimos la lista de Java a JSON para el Modal de forma segura con Thymeleaf -->
     <script th:inline="javascript">
         /*<![CDATA[*/
         const librosList = /*[[${librosDestacados}]]*/ [];

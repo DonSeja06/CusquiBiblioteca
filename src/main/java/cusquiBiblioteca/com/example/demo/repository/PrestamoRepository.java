@@ -9,8 +9,6 @@ import java.util.List;
 
 @Repository
 public interface PrestamoRepository extends JpaRepository<Prestamo, Long> {
-    
-    // Spring Boot buscará todos los préstamos vinculados a un usuario específico
     List<Prestamo> findByUsuario(Usuario usuario);
-    
+
 }

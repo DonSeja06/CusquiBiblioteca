@@ -120,7 +120,6 @@
                 
                 <form th:action="@{/catalogo}" method="get" class="relative w-full md:w-96">
                     <input type="text" name="search" th:value="${search}" placeholder="Buscar por título, autor o género..." class="w-full bg-white dark:bg-[#352D29] border border-biblioteca-brown/30 dark:border-gray-600 rounded-full pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-biblioteca-brown focus:ring-1 focus:ring-biblioteca-brown transition-all dark:text-white shadow-sm placeholder-gray-400">
-                    <!-- Si hay una categoría seleccionada, la mantenemos al buscar -->
                     <input type="hidden" name="categoria" th:if="${categoriaSeleccionada != null}" th:value="${categoriaSeleccionada}">
                     <button type="submit" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-biblioteca-text-light hover:text-biblioteca-brown cursor-pointer border-none bg-transparent">
                         <i class="fa-solid fa-search"></i>
@@ -160,7 +159,6 @@
                 <span>No puedes solicitar nuevos préstamos porque tienes una multa pendiente. Ve a tu perfil para regularizarla.</span>
             </div>
 
-            <!-- Grid de Materiales -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="catalog-books-grid">
                 
                 <div th:each="material : ${materiales}" 
@@ -221,7 +219,6 @@
         </section>
     </main>
 
-    <!-- Modal Centrado e Inteligente -->
     <div id="book-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-biblioteca-text/40 dark:bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
@@ -258,7 +255,6 @@
                         </div>
                     </div>
 
-                    <!-- El botón se inyectará aquí desde JavaScript -->
                     <div id="modal-action-container" class="mt-auto">
                         
                     </div>

@@ -23,8 +23,8 @@ public class LoginController {
     // 1. MUESTRA LA PANTALLA
     @GetMapping("/login")
     public String mostrarLogin(@RequestParam(value = "error", required = false) String error,
-                               @RequestParam(value = "logout", required = false) String logout,
-                               Model model) {
+            @RequestParam(value = "logout", required = false) String logout,
+            Model model) {
         if (error != null) {
             model.addAttribute("error", "Correo o contraseña incorrectos. Inténtalo de nuevo.");
         }
@@ -34,34 +34,27 @@ public class LoginController {
         return "login";
     }
 
-    // 2. PROCESA LOS DATOS CUANDO LE DAS CLICK A "INICIAR SESIÓN"
     @PostMapping("/login")
-    public String procesarLogin(@RequestParam("username") String correo, 
-                                @RequestParam("password") String contrasena, 
-                                HttpSession session) {
-                                    
-        // Buscamos si existe alguien con ese correo
+    public String procesarLogin(@RequestParam("username") String correo,
+            @RequestParam("password") String contrasena,
+            HttpSession session) {
+
         Optional<Usuario> usuarioOpcional = usuarioRepository.findByCorreo(correo);
 
-        // Si el usuario existe y la contraseña es exactamente igual
         if (usuarioOpcional.isPresent() && usuarioOpcional.get().getContrasena().equals(contrasena)) {
-            
-            // ¡Éxito! Guardamos los datos del usuario en la "Sesión"
+
             Usuario usuarioLogeado = usuarioOpcional.get();
             session.setAttribute("usuarioLogeado", usuarioLogeado);
-            
-            // Lo enviamos a la página principal
-            return "redirect:/"; 
+
+            return "redirect:/";
         }
 
-        // Si falla, lo regresamos al login marcando un error
         return "redirect:/login?error=true";
     }
 
-    // 3. CERRAR SESIÓN
     @GetMapping("/logout")
     public String cerrarSesion(HttpSession session) {
-        session.invalidate(); // Borramos la memoria
+        session.invalidate();
         return "redirect:/login?logout=true";
     }
 }
