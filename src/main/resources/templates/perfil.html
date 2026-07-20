@@ -42,6 +42,15 @@
         .glass-nav { background: rgba(250, 248, 245, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(184, 155, 132, 0.2); }
         .dark .glass-nav { background: rgba(42, 36, 33, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
 
@@ -181,9 +190,7 @@
     </main>
 
     <script>
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-        }
+        
     </script>
 </body>
 </html>

@@ -16,16 +16,25 @@ public class LibroService {
         this.libroRepository = libroRepository;
     }
 
-   
     public void buscarYMostrarLibrosPorAutor(String autor) {
         System.out.println("Resultados para el autor: " + autor);
 
-        libroRepository.findAll().stream()
-                .filter(libro -> libro.getAutor() != null && libro.getAutor().equalsIgnoreCase(autor)) // <-- Protección añadida
-                .forEach(libro -> System.out.println("- " + libro.getNombre() + " (Categoría: " + libro.getCategoria() + ")"));
+        try {
+            List<Libro> listaLibros = libroRepository.findAll();
+            
+            if (listaLibros == null || listaLibros.isEmpty()) {
+                throw new RuntimeException("No hay libros registrados en el sistema.");
+            }
+
+            listaLibros.stream()
+                    .filter(libro -> libro.getAutor() != null && libro.getAutor().equalsIgnoreCase(autor))
+                    .forEach(libro -> System.out.println("- " + libro.getNombre() + " (Categoría: " + libro.getCategoria() + ")"));
+
+        } catch (Exception e) {
+            System.err.println("Error al procesar la búsqueda por autor: " + e.getMessage());
+        }
     }
 
-  
     public List<String> filtrarNombresPorCategoria(String categoria) {
         return libroRepository.findAll().stream()
                 .filter(libro -> libro.getCategoria() != null && libro.getCategoria().equalsIgnoreCase(categoria))
@@ -33,7 +42,6 @@ public class LibroService {
                 .collect(Collectors.toList());
     }
 
-   
     public String obtenerResumenLibrosDisponibles() {
         return libroRepository.findAll().stream()
                 .filter(Libro::isDisponible)

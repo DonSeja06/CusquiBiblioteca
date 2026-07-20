@@ -1,68 +1,210 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" class="scroll-smooth" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Agregar Nuevo Libro</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${libro.id == null ? 'Añadir Libro' : 'Editar Libro'}">Gestión de Libros</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'biblioteca-bg': '#FAF8F5',
+                        'biblioteca-bg-dark': '#2A2421',
+                        'biblioteca-brown': '#B89B84',
+                        'biblioteca-brown-hover': '#9E816B',
+                        'biblioteca-text': '#4A3C31',
+                        'biblioteca-text-light': '#8C7B6E',
+                        'pastel-blue': '#E4EDF2',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAF8F5; color: #4A3C31; transition: all 0.3s ease; }
+        .dark body { background-color: #2A2421; color: #E8E3DF; }
+        .glass-nav { background: rgba(250, 248, 245, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(184, 155, 132, 0.2); }
+        .dark .glass-nav { background: rgba(42, 36, 33, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <div class="card shadow-sm mx-auto" style="max-width: 600px;">
-            <div class="card-header bg-dark text-white">
-                <h3 class="mb-0">Agregar Nuevo Libro</h3>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <header class="glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-screwdriver-wrench text-biblioteca-brown text-xl"></i>
+                <span class="font-serif font-bold text-xl text-biblioteca-text dark:text-white">Panel Interno</span>
             </div>
-            <div class="card-body">
-                <form th:action="@{/admin/guardar-libro}" th:object="${libro}" method="post">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Libro</label>
-                        <input type="text" class="form-control" th:field="*{nombre}" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Autor</label>
-                        <input type="text" class="form-control" th:field="*{autor}" required>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Categoría</label>
-                            <input type="text" class="form-control" th:field="*{categoria}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">ISBN</label>
-                            <input type="text" class="form-control" th:field="*{isbn}">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Editorial</label>
-                            <input type="text" class="form-control" th:field="*{editorial}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Páginas</label>
-                            <input type="number" class="form-control" th:field="*{cantidadPaginas}">
-                        </div>
-                    </div>
-
-                    <!-- Campo para la Descripción / Sinopsis -->
-                    <div class="mb-3">
-                        <label class="form-label">Descripción / Sinopsis</label>
-                        <textarea class="form-control" th:field="*{descripcion}" rows="3" placeholder="Escribe un breve resumen de la obra..."></textarea>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">URL de la Portada (Imagen)</label>
-                        <input type="text" class="form-control" th:field="*{urlImagen}" placeholder="https://ejemplo.com/imagen.jpg">
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">Guardar Libro</button>
-                    </div>
-                </form>
+            <div class="flex gap-4 items-center">
+                <button onclick="toggleDarkMode()" class="text-biblioteca-text-light hover:text-biblioteca-brown dark:hover:text-white transition-colors">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+                <a th:href="@{/catalogo}" class="text-sm font-medium text-biblioteca-text-light hover:text-biblioteca-brown dark:hover:text-white transition-colors">Ir al Catálogo</a>
             </div>
         </div>
-    </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
+        
+        <!-- Alertas de Éxito / Eliminación -->
+        <div th:if="${param.exito}" class="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg flex items-center gap-2 dark:bg-green-900/20 dark:border-green-800">
+            <i class="fa-solid fa-check-circle"></i> Libro guardado correctamente.
+        </div>
+        <div th:if="${param.eliminado}" class="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2 dark:bg-red-900/20 dark:border-red-800">
+            <i class="fa-solid fa-trash"></i> Libro eliminado permanentemente.
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- COLUMNA IZQUIERDA: EL FORMULARIO -->
+            <div class="w-full lg:w-5/12 xl:w-1/3">
+                <div class="bg-white dark:bg-[#352D29] rounded-[2rem] shadow-xl border border-biblioteca-brown/20 dark:border-white/5 p-8 sticky top-28">
+                    
+                    <div class="mb-6 text-center border-b border-gray-100 dark:border-white/5 pb-6">
+                        <h1 class="text-2xl font-serif font-bold text-biblioteca-text dark:text-white mb-2" th:text="${libro.id == null ? 'Agregar Libro' : 'Editar Libro'}">Agregar Libro</h1>
+                        <p class="text-xs text-biblioteca-text-light dark:text-gray-400" th:text="${libro.id == null ? 'Registra un nuevo material' : 'Modifica los datos del material'}"></p>
+                    </div>
+
+                    <form th:action="@{/admin/guardar-libro}" th:object="${libro}" method="post" class="space-y-4">
+                        <input type="hidden" th:field="*{id}" th:if="${libro.id != null}" />
+
+                        <div>
+                            <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Nombre del Libro</label>
+                            <input type="text" th:field="*{nombre}" required class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Autor</label>
+                            <input type="text" th:field="*{autor}" required class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Categoría</label>
+                                <input type="text" th:field="*{categoria}" required class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">ISBN</label>
+                                <input type="text" th:field="*{isbn}" class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Editorial</label>
+                                <input type="text" th:field="*{editorial}" class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Páginas</label>
+                                <input type="number" th:field="*{cantidadPaginas}" required min="1" class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">Descripción / Sinopsis</label>
+                            <textarea th:field="*{descripcion}" rows="3" class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white resize-y"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-biblioteca-text dark:text-gray-300 mb-1">URL de la Portada</label>
+                            <input type="url" th:field="*{urlImagen}" class="w-full bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-biblioteca-brown transition-colors dark:text-white">
+                        </div>
+                        
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" th:field="*{disponible}" class="w-4 h-4 text-biblioteca-brown rounded border-gray-300">
+                            <label class="text-xs font-medium text-biblioteca-text dark:text-gray-300">Disponible para Préstamo</label>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="w-full bg-[#207E54] hover:bg-[#186040] text-white font-bold py-2.5 px-4 rounded-lg transition-all shadow-md text-sm" th:text="${libro.id == null ? 'Guardar Libro' : 'Actualizar Libro'}">
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Botón Eliminar y Botón Cancelar (Aparecen solo al Editar) -->
+                    <div th:if="${libro.id != null}" class="mt-4 flex gap-2">
+                        <a th:href="@{/admin/agregar-libro}" class="w-1/2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-center font-bold py-2 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            Cancelar
+                        </a>
+                        <form th:action="@{/admin/eliminar-libro}" method="post" class="w-1/2" onsubmit="return confirm('¿Eliminar este libro?');">
+                            <input type="hidden" name="id" th:value="${libro.id}" />
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg text-sm transition-colors">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: LA LISTA DE LIBROS -->
+            <div class="w-full lg:w-7/12 xl:w-2/3">
+                <div class="bg-white dark:bg-[#352D29] rounded-[2rem] shadow-sm border border-gray-200 dark:border-white/5 p-6 md:p-8">
+                    <h2 class="text-2xl font-serif font-bold text-biblioteca-text dark:text-white mb-6">Libros Registrados</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Bucle para mostrar todos los libros de la Base de Datos -->
+                        <div th:each="b : ${libros}" class="flex gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-biblioteca-brown/50 hover:shadow-md transition-all bg-biblioteca-bg dark:bg-[#2A2421]">
+                            
+                            <img th:src="${b.urlImagen != null && !b.urlImagen.isEmpty() ? b.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-16 h-24 object-cover rounded shadow-sm">
+                            
+                            <div class="flex flex-col justify-between flex-grow">
+                                <div>
+                                    <h3 class="font-serif font-bold text-biblioteca-text dark:text-white line-clamp-1 text-sm" th:text="${b.nombre}">Título</h3>
+                                    <p class="text-xs text-biblioteca-text-light mb-1 line-clamp-1" th:text="${b.autor}">Autor</p>
+                                    <span class="text-[10px] bg-pastel-blue text-[#4A728A] px-2 py-0.5 rounded-full font-bold uppercase" th:text="${b.categoria}">Cat</span>
+                                </div>
+                                
+                                <div class="mt-2 text-right">
+                                    <a th:href="@{/admin/editar-libro/{id}(id=${b.id})}" class="text-xs bg-biblioteca-brown text-white px-4 py-1.5 rounded-lg hover:bg-biblioteca-brown-hover transition-colors inline-block font-medium">
+                                        <i class="fa-solid fa-pen-to-square mr-1"></i> Editar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje si no hay libros -->
+                        <div th:if="${#lists.isEmpty(libros)}" class="col-span-full text-center py-10">
+                            <p class="text-biblioteca-text-light italic text-sm">Aún no has registrado ningún libro.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+    </script>
 </body>
 </html>

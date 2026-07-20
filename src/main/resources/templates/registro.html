@@ -34,6 +34,15 @@
         body { background-color: #FAF8F5; color: #4A3C31; transition: all 0.3s ease; }
         .dark body { background-color: #2A2421; color: #E8E3DF; }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
 </head>
 <body class="font-sans antialiased min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
 
@@ -131,6 +140,18 @@
 
         </div>
     </div>
+    <script>
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+    </script>
 
 </body>
 </html>

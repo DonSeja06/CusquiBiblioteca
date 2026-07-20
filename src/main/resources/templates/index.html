@@ -51,6 +51,15 @@
         .dark .glass-nav { background: rgba(42, 36, 33, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .book-cover { aspect-ratio: 2 / 3; }
     </style>
+
+    <!-- Script para recordar el Modo Oscuro al recargar -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
 
@@ -72,35 +81,31 @@
                     <a th:href="@{/}" class="px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-300 dark:hover:bg-white/5 transition-all">Inicio</a>
                     <a th:href="@{/catalogo}" class="px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-300 dark:hover:bg-white/5 transition-all">Catálogo</a>
                     
-                    <!-- NUEVO: Solo se muestra si el usuario está logeado -->
                     <a th:if="${session.usuarioLogeado != null}" th:href="@{/mis-prestamos}" class="px-4 py-2 rounded-full text-sm font-medium text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-300 dark:hover:bg-white/5 transition-all">Mis Préstamos</a>
                 </nav>
 
                 <!-- Acciones Derecha -->
                 <div class="flex items-center gap-4">
-                    <!-- Botón Dark Mode -->
                     <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full flex items-center justify-center text-biblioteca-text-light hover:bg-biblioteca-brown/10 dark:text-gray-400 dark:hover:bg-white/10 transition-colors">
                         <i class="fa-solid fa-moon dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:block"></i>
                     </button>
 
-                    <!-- ESTADO 1: NO LOGEADO -->
+                    <!-- NO LOGEADO -->
                     <div th:if="${session.usuarioLogeado == null}" class="flex items-center gap-4">
                         <a th:href="@{/login}" class="text-sm font-medium text-biblioteca-brown hover:underline hidden sm:block">Iniciar Sesión</a>
                         <a th:href="@{/registro}" class="bg-biblioteca-brown text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-biblioteca-brown-hover transition-colors shadow-sm">Registrarse</a>
                     </div>
 
-                    <!-- ESTADO 2: LOGEADO (Perfil desplegable) -->
+                    <!-- LOGEADO -->
                     <div th:if="${session.usuarioLogeado != null}" class="flex items-center gap-3 relative group">
                         
                         <span class="text-sm font-medium text-biblioteca-text dark:text-white hidden sm:block" th:text="'Hola, ' + ${#strings.arraySplit(session.usuarioLogeado.nombre, ' ')[0]}">Hola, Usuario</span>
                         
-                        <!-- Avatar -->
                         <div class="w-9 h-9 rounded-full bg-pastel-blue border-2 border-white dark:border-gray-700 shadow-sm overflow-hidden cursor-pointer relative">
                             <img th:src="'https://api.dicebear.com/7.x/notionists/svg?seed=' + ${session.usuarioLogeado.nombre} + '&backgroundColor=E4EDF2'" alt="Perfil" class="w-full h-full object-cover">
                         </div>
 
-                        <!-- Menú Desplegable (Oculto por defecto, se muestra al hacer hover) -->
                         <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#352D29] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             
                             <div class="p-2 border-b border-gray-100 dark:border-white/10 sm:hidden">
@@ -153,6 +158,7 @@
                 </div>
             </div>
 
+            <!-- Los Más Pedidos -->
             <div>
                 <div class="flex justify-between items-end mb-6">
                     <div>
@@ -193,10 +199,121 @@
 
                 </div>
             </div>
+            
+            <!-- SECCIÓN DE RECOMENDACIONES SEGURAS -->
+            <div th:if="${session.usuarioLogeado != null && (recLibros != null || recRevistas != null)}" class="mt-16 pt-12 border-t border-biblioteca-brown/10 dark:border-white/5">
+                
+                <div class="mb-10 text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-biblioteca-brown mb-2 block">Exclusivo para ti</span>
+                    <h2 class="text-3xl font-serif font-bold text-biblioteca-text dark:text-white">Selección Inteligente</h2>
+                </div>
+                
+                <!-- Recomendaciones de Libros -->
+                <div th:if="${recLibros != null}" class="mb-12">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-biblioteca-brown text-white flex items-center justify-center shadow-md text-sm">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-serif font-bold text-biblioteca-text dark:text-white">Tus próximas lecturas</h3>
+                            <!-- SECCIÓN BLINDADA: Si hay historial muestra el nombre del libro, si no, muestra mensaje genérico -->
+                            <p th:if="${ultimoLibro != null}" class="text-sm text-biblioteca-text-light dark:text-gray-400">Basado en que leíste <span th:text="${ultimoLibro.nombre}" class="italic text-biblioteca-brown font-medium">Libro</span></p>
+                            <p th:unless="${ultimoLibro != null}" class="text-sm text-biblioteca-text-light dark:text-gray-400">Nuestra selección inicial para empezar tu lectura.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div th:if="${!#lists.isEmpty(recLibros.porAutorYGenero)}" class="bg-white dark:bg-[#352D29] p-5 rounded-2xl border-t-4 border-t-biblioteca-brown shadow-sm hover:shadow-soft transition-shadow border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
+                                <i class="fa-solid fa-star text-biblioteca-brown text-sm"></i>
+                                <h4 class="font-bold text-biblioteca-text dark:text-white text-sm">Sugerencias Principales</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <a th:each="libro : ${recLibros.porAutorYGenero}" th:href="@{/catalogo(search=${libro.nombre})}" class="flex gap-4 items-center p-2 hover:bg-biblioteca-bg dark:hover:bg-[#2A2421] rounded-xl transition-colors group block">
+                                    <img th:src="${libro.urlImagen != null && !libro.urlImagen.isEmpty() ? libro.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-12 h-16 object-cover rounded shadow-sm">
+                                    <div>
+                                        <h5 class="font-serif font-bold text-sm text-biblioteca-text dark:text-white line-clamp-2 leading-tight mb-1 group-hover:text-biblioteca-brown transition-colors" th:text="${libro.nombre}">Título</h5>
+                                        <p class="text-xs text-biblioteca-brown font-medium line-clamp-1" th:text="${libro.autor}">Autor</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(recLibros.porPaginasSimilares)}" class="bg-white dark:bg-[#352D29] p-5 rounded-2xl border-t-4 border-t-[#4A728A] shadow-sm hover:shadow-soft transition-shadow border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
+                                <i class="fa-solid fa-book-open-reader text-[#4A728A] text-sm"></i>
+                                <h4 class="font-bold text-biblioteca-text dark:text-white text-sm">Opciones Interesantes</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <a th:each="libro : ${recLibros.porPaginasSimilares}" th:href="@{/catalogo(search=${libro.nombre})}" class="flex gap-4 items-center p-2 hover:bg-biblioteca-bg dark:hover:bg-[#2A2421] rounded-xl transition-colors group block">
+                                    <img th:src="${libro.urlImagen != null && !libro.urlImagen.isEmpty() ? libro.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-12 h-16 object-cover rounded shadow-sm">
+                                    <div>
+                                        <h5 class="font-serif font-bold text-sm text-biblioteca-text dark:text-white line-clamp-2 leading-tight mb-1 group-hover:text-biblioteca-brown transition-colors" th:text="${libro.nombre}">Título</h5>
+                                        <p class="text-xs text-[#4A728A] font-medium line-clamp-1" th:text="${libro.autor}">Autor</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(recLibros.otrasSugerencias)}" class="bg-white dark:bg-[#352D29] p-5 rounded-2xl border-t-4 border-t-gray-400 shadow-sm hover:shadow-soft transition-shadow border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
+                                <i class="fa-solid fa-lightbulb text-gray-400 text-sm"></i>
+                                <h4 class="font-bold text-biblioteca-text dark:text-white text-sm">Podría interesarte</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <a th:each="libro : ${recLibros.otrasSugerencias}" th:href="@{/catalogo(search=${libro.nombre})}" class="flex gap-4 items-center p-2 hover:bg-biblioteca-bg dark:hover:bg-[#2A2421] rounded-xl transition-colors group block">
+                                    <img th:src="${libro.urlImagen != null && !libro.urlImagen.isEmpty() ? libro.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-12 h-16 object-cover rounded shadow-sm">
+                                    <div>
+                                        <h5 class="font-serif font-bold text-sm text-biblioteca-text dark:text-white line-clamp-2 leading-tight mb-1 group-hover:text-biblioteca-brown transition-colors" th:text="${libro.nombre}">Título</h5>
+                                        <p class="text-xs text-gray-500 font-medium line-clamp-1" th:text="${libro.autor}">Autor</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendaciones de Revistas -->
+                <div th:if="${recRevistas != null}">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-pastel-blue text-[#4A728A] flex items-center justify-center shadow-md text-sm">
+                            <i class="fa-solid fa-newspaper"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-serif font-bold text-biblioteca-text dark:text-white">Explora más Revistas</h3>
+                            <!-- SECCIÓN BLINDADA -->
+                            <p th:if="${ultimaRevista != null}" class="text-sm text-biblioteca-text-light dark:text-gray-400">Porque estuviste viendo la revista de <span th:text="${ultimaRevista.categoria}" class="font-bold"></span>.</p>
+                            <p th:unless="${ultimaRevista != null}" class="text-sm text-biblioteca-text-light dark:text-gray-400">Explora nuestro catálogo de publicaciones periódicas.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a th:each="revista : ${recRevistas.siguienteVolumen}" th:href="@{/catalogo(search=${revista.nombre})}" class="flex items-center gap-4 bg-white dark:bg-[#352D29] pr-5 rounded-full border border-biblioteca-brown/10 dark:border-white/5 shadow-sm hover:shadow-md hover:border-biblioteca-brown transition-all group">
+                            <img th:src="${revista.urlImagen != null && !revista.urlImagen.isEmpty() ? revista.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-12 h-12 object-cover rounded-full ml-1 my-1">
+                            <div>
+                                <p class="text-[9px] font-bold text-[#4A728A] uppercase tracking-wider mb-0.5">Vol. Siguiente</p>
+                                <p class="text-sm font-serif font-bold text-biblioteca-text dark:text-white group-hover:text-biblioteca-brown transition-colors" th:text="${revista.nombre}">Nombre</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-300 ml-1 text-xs group-hover:text-biblioteca-brown transition-colors"></i>
+                        </a>
+                        
+                        <a th:each="revista : ${recRevistas.mismaEditorial}" th:href="@{/catalogo(search=${revista.nombre})}" class="flex items-center gap-4 bg-white dark:bg-[#352D29] pr-5 rounded-full border border-biblioteca-brown/10 dark:border-white/5 shadow-sm hover:shadow-md hover:border-biblioteca-brown transition-all group">
+                            <img th:src="${revista.urlImagen != null && !revista.urlImagen.isEmpty() ? revista.urlImagen : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80'}" class="w-12 h-12 object-cover rounded-full ml-1 my-1">
+                            <div>
+                                <p class="text-[9px] font-bold text-biblioteca-brown uppercase tracking-wider mb-0.5">Misma Editorial</p>
+                                <p class="text-sm font-serif font-bold text-biblioteca-text dark:text-white group-hover:text-biblioteca-brown transition-colors" th:text="${revista.nombre}">Nombre</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-300 ml-1 text-xs group-hover:text-biblioteca-brown transition-colors"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
         </section>
 
     </main>
 
+    <!-- Modal Mejorado -->
     <div id="book-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-biblioteca-text/40 dark:bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
         
@@ -214,47 +331,51 @@
 
                 <div class="w-full md:w-7/12 p-8 md:p-10 flex flex-col justify-center">
                     
-                    <span id="modal-genre" class="px-3 py-1 bg-pastel-blue text-[#4A728A] text-[10px] font-bold uppercase tracking-wider rounded-full self-start mb-4">
-                        LITERATURA INFANTIL Y JUVENIL
-                    </span>
+                    <span id="modal-genre" class="px-3 py-1 bg-pastel-blue text-[#4A728A] text-[10px] font-bold uppercase tracking-wider rounded-full self-start mb-4">CATEGORIA</span>
                     
-                    <h2 id="modal-title" class="text-3xl md:text-4xl font-serif font-bold text-biblioteca-text dark:text-white mb-1">Principito</h2>
-                    <h3 id="modal-author" class="text-base text-biblioteca-brown font-medium mb-6">Antoine de Saint-Exupéry</h3>
-                    <p id="modal-desc" class="text-biblioteca-text-light dark:text-gray-300 text-sm leading-relaxed mb-6 line-clamp-4">
-                        Aquí irá la sinopsis...
-                    </p>
+                    <h2 id="modal-title" class="text-3xl md:text-4xl font-serif font-bold text-biblioteca-text dark:text-white mb-1">Título</h2>
+                    <h3 id="modal-author" class="text-base text-biblioteca-brown font-medium mb-4">Autor</h3>
+                    <p id="modal-desc" class="text-biblioteca-text-light dark:text-gray-300 text-sm leading-relaxed mb-6 line-clamp-4">Sinopsis...</p>
+                    
                     <div class="border-y border-gray-100 dark:border-white/5 py-4 mb-8 flex gap-8">
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-bold">Páginas</p>
-                            <p id="modal-pages" class="font-bold text-biblioteca-text dark:text-white text-sm">110</p>
+                            <p id="modal-pages" class="font-bold text-biblioteca-text dark:text-white text-sm">--</p>
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-bold">ISBN</p>
-                            <p id="modal-isbn" class="font-bold text-biblioteca-text dark:text-white text-sm">9786123192297</p>
+                            <p id="modal-isbn" class="font-bold text-biblioteca-text dark:text-white text-sm">--</p>
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 font-bold">Estado</p>
-                            <p id="modal-status" class="font-bold text-green-600 text-sm">Disponible</p>
+                            <p id="modal-status" class="font-bold text-sm">--</p>
                         </div>
                     </div>
 
-                    <div class="mt-auto">
-                        <a th:href="@{/login}" class="w-full py-3 rounded-xl font-bold text-white bg-[#BE9E83] hover:bg-[#A68971] transition-all flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-lock text-sm"></i> Inicia sesión para solicitar préstamo
-                        </a>
-                    </div>
+                    <!-- Botón Inteligente (Inyectado por JS) -->
+                    <div id="modal-action-container" class="mt-auto"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts con lógica inteligente -->
     <script th:inline="javascript">
         /*<![CDATA[*/
         const librosList = /*[[${librosDestacados}]]*/ [];
+        const isLogeado = /*[[${session.usuarioLogeado != null}]]*/ false;
+        const tieneMulta = /*[[${session.usuarioLogeado != null && session.usuarioLogeado.multaAcumulada != null && session.usuarioLogeado.multaAcumulada > 0}]]*/ false;
         /*]]>*/
 
         function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
         }
 
         function openModal(bookId) {
@@ -274,19 +395,51 @@
                             : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80';
 
             const statusEl = document.getElementById('modal-status');
+            const actionContainer = document.getElementById('modal-action-container');
+
             if(book.disponible) {
                 statusEl.textContent = 'Disponible';
                 statusEl.className = 'font-bold text-green-600 dark:text-green-400 text-sm';
+                
+                if (isLogeado) {
+                    if (tieneMulta) {
+                        actionContainer.innerHTML = `
+                            <a href="/perfil" class="w-full py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-all flex justify-center items-center gap-2 shadow-md">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Tienes multas (Pagar en Perfil)
+                            </a>
+                        `;
+                    } else {
+                        actionContainer.innerHTML = `
+                            <form action="/solicitar-prestamo" method="post" class="w-full">
+                                <input type="hidden" name="materialId" value="${book.id}">
+                                <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-[#BE9E83] hover:bg-[#A68971] transition-all flex justify-center items-center gap-2 shadow-md">
+                                    <i class="fa-solid fa-hand-holding-heart"></i> Solicitar Préstamo
+                                </button>
+                            </form>
+                        `;
+                    }
+                } else {
+                    actionContainer.innerHTML = `
+                        <a href="/login" class="w-full py-3 rounded-xl font-bold text-white bg-[#BE9E83] hover:bg-[#A68971] transition-all flex justify-center items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-lock text-sm"></i> Inicia sesión para solicitar
+                        </a>
+                    `;
+                }
             } else {
                 statusEl.textContent = 'Prestado';
                 statusEl.className = 'font-bold text-red-600 dark:text-red-400 text-sm';
+                actionContainer.innerHTML = `
+                    <button disabled class="w-full py-3 rounded-xl font-bold text-gray-500 bg-gray-200 cursor-not-allowed flex justify-center items-center gap-2 shadow-sm dark:bg-gray-800 dark:text-gray-400">
+                        <i class="fa-solid fa-clock"></i> Material actualmente prestado
+                    </button>
+                `;
             }
 
             const modal = document.getElementById('book-modal');
             const modalContent = document.getElementById('modal-content');
             
             modal.classList.remove('hidden');
-            void modal.offsetWidth; // Trigger reflow
+            void modal.offsetWidth; 
             modal.classList.remove('opacity-0');
             modalContent.classList.remove('scale-95');
         }

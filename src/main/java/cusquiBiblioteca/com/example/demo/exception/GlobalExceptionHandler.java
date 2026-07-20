@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,9 +19,9 @@ public class GlobalExceptionHandler {
 
     // violaciones de reglas de negocio 
     @ExceptionHandler(BusinessRuleException.class)
-    public String handleBusinessRules(BusinessRuleException ex, Model model) {
-        model.addAttribute("error", ex.getMessage());
-        return "redirect:/catalogo?errorCustom=" + ex.getMessage();
+    public String handleBusinessRules(BusinessRuleException ex, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        return "redirect:/catalogo"; 
     }
 
     //errores de base de datos 

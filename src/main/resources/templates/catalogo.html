@@ -43,6 +43,15 @@
         .dark .glass-nav { background: rgba(42, 36, 33, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .book-cover { aspect-ratio: 2 / 3; }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
 
@@ -109,6 +118,19 @@
     </header>
 
     <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Alerta para Reglas de Negocio Rota (Pon esto dentro del main de tu catalogo.html) -->
+        <div th:if="${error}" class="max-w-7xl mx-auto px-4 mt-8">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm flex items-center justify-between dark:bg-red-900/20 dark:text-red-400">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-exclamation text-lg"></i>
+                    <p class="font-medium" th:text="${error}"></p>
+                </div>
+                <button onclick="this.parentElement.style.display='none'" class="text-red-500 hover:text-red-700">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
         
         <section>
             <!-- Cabecera del Catálogo y Formulario de Búsqueda de Servidor -->
@@ -217,6 +239,8 @@
             </div>
             
         </section>
+
+
     </main>
 
     <div id="book-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6 opacity-0 transition-opacity duration-300">
@@ -272,7 +296,15 @@
         /*]]>*/
 
         function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Si tiene la clase 'dark', guardamos 'dark' en memoria, si no, guardamos 'light'
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
         }
 
         function openModal(itemId) {
