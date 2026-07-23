@@ -102,52 +102,50 @@ public class RecomendacionesService {
     }
 
     private RecomendacionLibroDTO generarRecomendacionesLibrosLogica(String autorMasLeido, String categoriaFavorita, int paginasPreferencia, Long ultimoLibroId) {
-        List<Libro> todosLosLibros = libroRepository.findAll();
         RecomendacionLibroDTO dto = new RecomendacionLibroDTO();
         dto.setPorAutorYGenero(new ArrayList<>());
         dto.setPorPaginasSimilares(new ArrayList<>());
         dto.setOtrasSugerencias(new ArrayList<>());
 
-        for (Libro libro : todosLosLibros) {
-            if (ultimoLibroId != null && libro.getId().equals(ultimoLibroId)) continue; 
+        libroRepository.findAll().stream()
+                .filter(libro -> ultimoLibroId == null || !libro.getId().equals(ultimoLibroId))
+                .forEach(libro -> {
+                    boolean mismoAutor = libro.getAutor() != null && libro.getAutor().equalsIgnoreCase(autorMasLeido);
+                    boolean mismaCategoria = libro.getCategoria() != null && libro.getCategoria().equalsIgnoreCase(categoriaFavorita);
+                    boolean paginasSimilares = Math.abs(libro.getCantidadPaginas() - paginasPreferencia) <= 100;
 
-            boolean mismoAutor = libro.getAutor() != null && libro.getAutor().equalsIgnoreCase(autorMasLeido);
-            boolean mismaCategoria = libro.getCategoria() != null && libro.getCategoria().equalsIgnoreCase(categoriaFavorita);
-            boolean paginasSimilares = Math.abs(libro.getCantidadPaginas() - paginasPreferencia) <= 100;
-
-            if (mismoAutor && mismaCategoria) {
-                dto.getPorAutorYGenero().add(libro);
-            } else if (mismaCategoria && paginasSimilares) {
-                dto.getPorPaginasSimilares().add(libro);
-            } else if (mismoAutor || mismaCategoria) {
-                dto.getOtrasSugerencias().add(libro);
-            }
-        }
+                    if (mismoAutor && mismaCategoria) {
+                        dto.getPorAutorYGenero().add(libro);
+                    } else if (mismaCategoria && paginasSimilares) {
+                        dto.getPorPaginasSimilares().add(libro);
+                    } else if (mismoAutor || mismaCategoria) {
+                        dto.getOtrasSugerencias().add(libro);
+                    }
+                });
         return dto;
     }
 
     private RecomendacionRevistaDTO generarRecomendacionesRevistasLogica(String categoriaFavorita, String editorialFavorita, int ultimoVolumen, Long ultimaRevistaId) {
-        List<Revista> todasLasRevistas = revistaRepository.findAll();
         RecomendacionRevistaDTO dto = new RecomendacionRevistaDTO();
         dto.setSiguienteVolumen(new ArrayList<>());
         dto.setMismaEditorial(new ArrayList<>());
         dto.setOtrasRevistasCategorias(new ArrayList<>());
 
-        for (Revista revista : todasLasRevistas) {
-            if (ultimaRevistaId != null && revista.getId().equals(ultimaRevistaId)) continue;
+        revistaRepository.findAll().stream()
+                .filter(revista -> ultimaRevistaId == null || !revista.getId().equals(ultimaRevistaId))
+                .forEach(revista -> {
+                    boolean mismaCategoria = revista.getCategoria() != null && revista.getCategoria().equalsIgnoreCase(categoriaFavorita);
+                    boolean mismaEditorial = revista.getAutor() != null && revista.getAutor().equalsIgnoreCase(editorialFavorita);
+                    boolean esVolumenAdyacente = revista.getVolumen() == (ultimoVolumen + 1) || revista.getVolumen() == (ultimoVolumen - 1);
 
-            boolean mismaCategoria = revista.getCategoria() != null && revista.getCategoria().equalsIgnoreCase(categoriaFavorita);
-            boolean mismaEditorial = revista.getAutor() != null && revista.getAutor().equalsIgnoreCase(editorialFavorita);
-            boolean esVolumenAdyacente = revista.getVolumen() == (ultimoVolumen + 1) || revista.getVolumen() == (ultimoVolumen - 1);
-
-            if (mismaCategoria && esVolumenAdyacente) {
-                dto.getSiguienteVolumen().add(revista);
-            } else if (mismaEditorial) {
-                dto.getMismaEditorial().add(revista);
-            } else if (mismaCategoria) {
-                dto.getOtrasRevistasCategorias().add(revista);
-            }
-        }
+                    if (mismaCategoria && esVolumenAdyacente) {
+                        dto.getSiguienteVolumen().add(revista);
+                    } else if (mismaEditorial) {
+                        dto.getMismaEditorial().add(revista);
+                    } else if (mismaCategoria) {
+                        dto.getOtrasRevistasCategorias().add(revista);
+                    }
+                });
         return dto;
     }
 }
