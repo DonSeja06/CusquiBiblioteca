@@ -20,13 +20,11 @@ public class ReporteController {
 
     @GetMapping
     public String verReportes(HttpSession session, Model model) {
-        // En un sistema real esto lo verificaría Spring Security
         Usuario usuarioLogeado = (Usuario) session.getAttribute("usuarioLogeado");
         if (usuarioLogeado == null) {
             return "redirect:/login";
         }
         
-        // Podríamos agregar rol admin y verificar aquí, por ahora permitimos ver los reportes
         model.addAttribute("materialesMasPrestados", reporteService.obtenerMaterialesMasPrestados());
         model.addAttribute("usuariosMasPrestamos", reporteService.obtenerUsuariosConMasPrestamos());
         model.addAttribute("materialesNuncaPrestados", reporteService.obtenerMaterialesNuncaPrestados());

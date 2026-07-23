@@ -20,7 +20,6 @@ public class LoginController {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // 1. MUESTRA LA PANTALLA
     @GetMapping("/login")
     public String mostrarLogin(@RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,

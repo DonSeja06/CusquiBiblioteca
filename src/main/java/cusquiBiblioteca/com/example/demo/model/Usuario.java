@@ -23,7 +23,6 @@ public class Usuario {
     private String nombre;
     private String correo;
     
-    // NUEVO CAMPO:
     private String contrasena;
 
     private float multaAcumulada;
