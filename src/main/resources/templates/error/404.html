@@ -42,7 +42,6 @@
 
         <h1 class="text-4xl font-serif font-bold mb-4">404</h1>
         
-        <!-- Aquí imprimimos el mensaje que mandas desde tu Java -->
         <p class="text-lg text-gray-600 dark:text-gray-300 mb-8" th:text="${mensajeError != null ? mensajeError : 'El recurso que buscas no existe o ha sido movido.'}"></p>
         
         <a th:href="@{/}" class="inline-flex items-center gap-2 bg-biblioteca-brown text-white px-8 py-3 rounded-full font-medium hover:bg-[#9E816B] transition-colors shadow-md">

@@ -109,6 +109,7 @@ public class PrestamoService {
                 ));
     }
 
+    //metodos lambda .filter .map
     public List<String> obtenerCorreosParaNotificacionVencimiento() {
         return prestamoRepository.findAll().stream()
                 .filter(prestamo -> prestamo.getEstado().equalsIgnoreCase("VENCIDO"))

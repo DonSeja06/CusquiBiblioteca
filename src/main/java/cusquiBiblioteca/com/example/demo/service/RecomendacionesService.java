@@ -101,6 +101,7 @@ public class RecomendacionesService {
                 .orElse(valorPorDefecto);
     }
 
+    //usando en foreach
     private RecomendacionLibroDTO generarRecomendacionesLibrosLogica(String autorMasLeido, String categoriaFavorita, int paginasPreferencia, Long ultimoLibroId) {
         RecomendacionLibroDTO dto = new RecomendacionLibroDTO();
         dto.setPorAutorYGenero(new ArrayList<>());

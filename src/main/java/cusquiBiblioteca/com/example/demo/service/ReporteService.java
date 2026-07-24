@@ -64,7 +64,7 @@ public class ReporteService {
                 .filter(m -> !materialesPrestadosIds.contains(m.getId()))
                 .collect(Collectors.toList());
     }
-
+    //lamda sum
     public double obtenerMontoTotalMultas() {
         return usuarioRepository.findAll().stream()
                 .mapToDouble(Usuario::getMultaAcumulada)
